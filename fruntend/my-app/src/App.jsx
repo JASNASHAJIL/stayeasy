@@ -2,13 +2,15 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { StayContextProvider } from "./context/StayContext.jsx";
 import Header from "./components/Header.jsx";
 import UserMap from "./components/user/UserMap.jsx";
-import OwnerDashboard from "./components/owner/OwnerDashboard.jsx";
+
 import AddStay from "./components/owner/AddStay.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
 import ForgotPassword from "./components/Auth/ForgotPassword.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import UserPage from "./pages/UserPage.jsx";
+import OwnerDashboard from "./components/owner/OwnerDashboard.jsx";
+
 
 function App() {
   return (

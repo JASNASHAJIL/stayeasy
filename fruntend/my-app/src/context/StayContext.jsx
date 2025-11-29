@@ -34,10 +34,20 @@ export const StayContextProvider = ({ children }) => {
 
   // ---------- FETCH STAYS ----------
   const fetchStays = async () => {
+    if (!user) return; // no user logged in
     setLoading(true);
     setError(null);
+
     try {
-      const res = await fetch("http://localhost:5000/api/stay/all");
+      let url = "http://localhost:5000/api/stay/all"; // default for normal users
+      const headers = {};
+
+      if (user.role === "owner" && user.token) {
+        url = "http://localhost:5000/api/owner/my-stays"; // owner-only endpoint
+        headers["Authorization"] = `Bearer ${user.token}`;
+      }
+
+      const res = await fetch(url, { headers });
       const data = await res.json();
 
       if (data.success) {
@@ -53,14 +63,14 @@ export const StayContextProvider = ({ children }) => {
     }
   };
 
-  // Fetch stays on mount
+  // Fetch stays whenever the user changes (login/logout)
   useEffect(() => {
     fetchStays();
-  }, []);
+  }, [user]);
 
-  // Add stay for owners
+  // Add a newly created stay to state immediately
   const addStayToState = (stay) => {
-    setStays((prev) => [...prev, stay]);
+    setStays((prev) => [stay, ...prev]);
   };
 
   return (

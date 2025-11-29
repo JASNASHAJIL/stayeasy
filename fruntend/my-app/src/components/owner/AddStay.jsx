@@ -9,21 +9,19 @@ export default function AddStay() {
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Handle file selection
   const handleFileChange = (e) => {
-    const files = Array.from(e.target.files).filter(Boolean);
-    setImages(files);
+    setImages(Array.from(e.target.files).filter(Boolean));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation
     if (!images.length) return alert("Upload at least one image");
     if (isNaN(lat) || isNaN(lng)) return alert("Latitude and Longitude must be numbers");
 
-    // Prepare FormData
     const formData = new FormData();
     formData.append("title", title);
     formData.append("rent", rent);
@@ -34,10 +32,15 @@ export default function AddStay() {
     images.forEach((img) => formData.append("images", img));
 
     try {
-      const token = localStorage.getItem("token"); // Make sure token exists
-      const res = await API.post("/stay/add", formData, {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) return alert("You must be logged in as owner");
+
+      // POST to local upload backend
+      const res = await API.post("/owner/add", formData, {
         headers: {
-          Authorization: `Bearer ${token}`, // Let Axios set Content-Type automatically
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -54,18 +57,15 @@ export default function AddStay() {
     } catch (err) {
       console.error("Upload error:", err.response?.data || err.message);
       alert(err.response?.data?.message || "Error uploading stay");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        width: "300px",
-      }}
+      style={{ display: "flex", flexDirection: "column", gap: "10px", width: "300px" }}
     >
       <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
       <input type="number" placeholder="Rent" value={rent} onChange={(e) => setRent(e.target.value)} required />
@@ -75,7 +75,6 @@ export default function AddStay() {
       <input type="text" placeholder="Longitude" value={lng} onChange={(e) => setLng(e.target.value)} required />
       <input type="file" multiple accept="image/*" onChange={handleFileChange} />
 
-      {/* Preview selected images */}
       {images.length > 0 && (
         <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
           {images.map((img, idx) => (
@@ -89,7 +88,9 @@ export default function AddStay() {
         </div>
       )}
 
-      <button type="submit">Add Stay</button>
+      <button type="submit" disabled={loading}>
+        {loading ? "Uploading..." : "Add Stay"}
+      </button>
     </form>
   );
 }
