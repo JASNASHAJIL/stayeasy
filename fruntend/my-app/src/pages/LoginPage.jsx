@@ -11,18 +11,37 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    try {
-      const res = await API.post("/login", {  username, password });
+  try {
+    const data = { username: username.trim(), password: password.trim() };
+    const res = await API.post("/login", data);
+    const { token, user: u } = res.data;
 
-      login({ token: res.data.token, user: res.data.user });
+    // Save to localStorage for later API requests
+    const userData = {
+  token,
+  _id: u._id,
+  name: u.name,
+  role: u.role,
+  isSubscribed: u.isSubscribed
+};
 
-      if (res.data.user.role === "owner") navigate("/dashboard");
-      else if (res.data.user.role === "admin") navigate("/admin-dashboard");
-      else navigate("/user");
-    } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
-    }
-  };
+localStorage.setItem("user", JSON.stringify(userData));
+login(userData);
+
+
+    // Navigate based on role
+    setTimeout(() => {
+      if (u.role === "admin") navigate("/admin-dashboard");
+      else if (u.role === "owner") navigate("/dashboard");
+      else navigate("/");
+    }, 50);
+  } catch (err) {
+    alert(err.response?.data?.message || "Login failed");
+  }
+};
+
+
+
 
   return (
     <div style={styles.container}>
@@ -62,9 +81,7 @@ const styles = {
     background: "#fff",
     textAlign: "center"
   },
-  title: {
-    marginBottom: "20px"
-  },
+  title: { marginBottom: "20px" },
   input: {
     width: "90%",
     padding: "10px",

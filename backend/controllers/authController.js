@@ -1,52 +1,76 @@
-const User = require("../models/User");
-const Owner = require("../models/Owner");
-const Admin = require("../models/Admin");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const axios = require("axios");
+const bcrypt = require("bcryptjs");
+const Admin = require("../models/Admin");
+const Owner = require("../models/Owner");
+const User = require("../models/User");
 
-// Generate 6-digit OTP
-const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
-
-// ================= REGISTER =================
+// ================== REGISTER ==================
 exports.registerController = async (req, res) => {
   try {
     const { username, name, phone, password, role } = req.body;
+
     if (!username || !name || !phone || !password || !role)
       return res.status(400).json({ success: false, message: "All fields are required" });
 
-    let Model = role === "owner" ? Owner : User;
+    let Model = role === "owner" ? Owner : role === "user" ? User : null;
+    if (!Model) return res.status(400).json({ success: false, message: "Invalid role" });
 
-    const existing = await Model.findOne({ $or: [{ username }, { phone }] });
-    if (existing) return res.status(400).json({ success: false, message: "Username or phone already exists" });
+    const exists = await Model.findOne({ username });
+    if (exists) return res.status(400).json({ success: false, message: "Username already exists" });
 
-    const user = new Model({ username, name, phone, password });
-    await user.save();
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    res.status(201).json({ success: true, message: `${role} registered successfully`, user });
+    const user = await Model.create({
+      username,
+      name,
+      phone,
+      password: hashedPassword,
+      role,
+    });
+
+    res.status(201).json({ success: true, message: "Registration successful", user });
   } catch (err) {
     console.error("Register error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// ================= LOGIN =================
+// ================== LOGIN ==================
 exports.loginController = async (req, res) => {
   try {
-    const { username, password, role } = req.body;
-    if (!username || !password || !role)
-      return res.status(400).json({ success: false, message: "All fields are required" });
+    const { username, password } = req.body;
 
-    let Model = role === "owner" ? Owner : role === "admin" ? Admin : User;
-    const user = await Model.findOne({ username });
+    if (!username || !password)
+      return res.status(400).json({ success: false, message: "Username and password required" });
+
+    // 1️⃣ Check Admin first
+    let user = await Admin.findOne({ username });
+
+    // 2️⃣ If not admin, check Owner or User
+    if (!user) {
+      user = await Owner.findOne({ username }) || await User.findOne({ username });
+    }
+
     if (!user) return res.status(400).json({ success: false, message: "Invalid credentials" });
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
 
+    // Sign JWT using role from DB
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "30d" });
 
-    res.json({ success: true, message: "Login successful", token, user });
+    res.json({
+  success: true,
+  message: `${user.role} login successful`,
+  token,
+  user: {
+    _id: user._id,
+    name: user.name,
+    role: user.role,
+    isSubscribed: user.isSubscribed || false
+  }
+});
+
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ success: false, message: "Server error" });

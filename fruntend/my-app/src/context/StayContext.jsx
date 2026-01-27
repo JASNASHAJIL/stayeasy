@@ -6,10 +6,9 @@ export const StayContextProvider = ({ children }) => {
   const [stays, setStays] = useState([]);
   const [user, setUser] = useState(() => {
     try {
-      const token = localStorage.getItem("token");
-      const userInfo = localStorage.getItem("user");
-      if (!token || !userInfo) return null;
-      return { token, ...JSON.parse(userInfo) };
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) return null;
+      return JSON.parse(storedUser); // must include token in user object
     } catch {
       return null;
     }
@@ -18,43 +17,41 @@ export const StayContextProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ---------- AUTH ----------
-  const login = ({ token, user }) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-    setUser({ token, ...user });
+  // ---------- LOGIN ----------
+  const login = ({ token, name, role, _id }) => {
+    // Save everything in one object
+    const userData = { token, name, role, _id };
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
   };
 
+  // ---------- LOGOUT ----------
   const logout = () => {
-    localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   // ---------- FETCH STAYS ----------
   const fetchStays = async () => {
-    if (!user) return; // no user logged in
+    if (!user) return;
     setLoading(true);
     setError(null);
 
     try {
-      let url = "http://localhost:5000/api/stay/all"; // default for normal users
+      let url = "http://localhost:5000/api/stay/all";
       const headers = {};
 
-      if (user.role === "owner" && user.token) {
-        url = "http://localhost:5000/api/owner/my-stays"; // owner-only endpoint
+      if ((user.role === "owner" || user.role === "admin") && user.token) {
         headers["Authorization"] = `Bearer ${user.token}`;
+        if (user.role === "owner") url = "http://localhost:5000/api/owner/my-stays";
       }
 
       const res = await fetch(url, { headers });
       const data = await res.json();
 
-      if (data.success) {
-        setStays(data.stays);
-      } else {
-        setError(data.message || "Failed to fetch stays");
-      }
+      if (data.success) setStays(data.stays || []);
+      else setError(data.message || "Failed to fetch stays");
     } catch (err) {
       console.error("Fetch stays error:", err);
       setError("Network error while fetching stays");
@@ -63,12 +60,11 @@ export const StayContextProvider = ({ children }) => {
     }
   };
 
-  // Fetch stays whenever the user changes (login/logout)
+  // Fetch stays whenever user changes
   useEffect(() => {
     fetchStays();
   }, [user]);
 
-  // Add a newly created stay to state immediately
   const addStayToState = (stay) => {
     setStays((prev) => [stay, ...prev]);
   };

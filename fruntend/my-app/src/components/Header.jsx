@@ -8,7 +8,7 @@ export default function Header() {
 
   return (
     <header style={styles.header}>
-      <div style={styles.logo} onClick={() => navigate("/user-map")}>
+      <div style={styles.logo} onClick={() => navigate("/userpage")}>
         StayEase
       </div>
       <nav style={styles.nav}>
@@ -33,7 +33,7 @@ export default function Header() {
 
         {user && user.role === "admin" && (
           <>
-            <button style={styles.button} onClick={() => navigate("/admin-dashboard")}>
+            <button style={styles.button} onClick={() => navigate("/admin")}>
               Admin Dashboard
             </button>
             <button style={styles.button} onClick={logout}>Logout</button>

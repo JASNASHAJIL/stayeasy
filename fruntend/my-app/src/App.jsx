@@ -10,6 +10,9 @@ import ForgotPassword from "./components/Auth/ForgotPassword.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import UserPage from "./pages/UserPage.jsx";
 import OwnerDashboard from "./components/owner/OwnerDashboard.jsx";
+import AdminDashboard from "./components/admin/AdminDashboard.jsx";
+
+
 
 
 function App() {
@@ -30,22 +33,45 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Protected routes */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <OwnerDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/add-stay"
-            element={
-              <ProtectedRoute>
-                <AddStay />
-              </ProtectedRoute>
-            }
-          />
+          
+          // Owner routes
+<Route
+  path="/dashboard"
+  element={
+    <ProtectedRoute allowedRoles={["owner"]}>
+      <OwnerDashboard />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/add-stay"
+  element={
+    <ProtectedRoute allowedRoles={["owner"]}>
+      <AddStay />
+    </ProtectedRoute>
+  }
+/>
+
+// Admin route
+<Route
+  path="/admin-dashboard"
+  element={
+    <ProtectedRoute allowedRoles={["admin"]}>
+      <AdminDashboard />
+    </ProtectedRoute>
+  }
+/>
+
+// Routes accessible to all logged-in users
+<Route
+  path="/userpage"
+  element={
+    <ProtectedRoute>
+      <UserPage />
+    </ProtectedRoute>
+  }
+/>
+
         </Routes>
       </Router>
     </StayContextProvider>

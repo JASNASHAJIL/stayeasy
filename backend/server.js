@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // -------------------- ROUTES --------------------
-app.use("/api/auth", authRoutes);         // Login / Register / OTP
+app.use("/api", authRoutes);         // Login / Register / OTP
 app.use("/api/owner", ownerRoutes);       // Owner → Add / Get Stays
 app.use("/api/stay", stayRoutes);         // Stays + Admin approval
 app.use("/api/admin", adminRoutes);       // Admin panel

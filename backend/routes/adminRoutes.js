@@ -1,20 +1,23 @@
 const router = require("express").Router();
+const authMiddleware = require("../middleware/authMiddleware");
+
 const {
   getAllUsers,
   getAllOwners,
   getPendingStays,
   approveStay,
-  rejectStay
+  rejectStay,
 } = require("../controllers/adminController");
 
-const { verifyAdminToken } = require("../middleware/authMiddleware");
+// USERS
+router.get("/users", authMiddleware, getAllUsers);
 
-// Admin-only routes
-router.get("/users", verifyAdminToken, getAllUsers);
-router.get("/owners", verifyAdminToken, getAllOwners);
+// OWNERS
+router.get("/owners", authMiddleware, getAllOwners);
 
-router.get("/pending-stays", verifyAdminToken, getPendingStays);
-router.put("/approve-stay/:id", verifyAdminToken, approveStay);
-router.put("/reject-stay/:id", verifyAdminToken, rejectStay);
+// STAYS
+router.get("/stays/pending", authMiddleware, getPendingStays);
+router.put("/stays/:id/approve", authMiddleware, approveStay);
+router.put("/stays/:id/reject", authMiddleware, rejectStay);
 
 module.exports = router;

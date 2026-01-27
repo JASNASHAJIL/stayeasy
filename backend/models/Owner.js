@@ -6,7 +6,12 @@ const ownerSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   phone: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, default: "owner" }
+  role: { type: String, default: "owner" },
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending", // new owners start as pending
+  },
 }, { timestamps: true });
 
 ownerSchema.pre("save", async function(next) {

@@ -11,7 +11,7 @@ const staySchema = new mongoose.Schema({
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "Owner", required: true },
   status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
   approvedAt: { type: Date },
-  rejectedAt: { type: Date }
+  rejectedAt: { type: Date },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Stay", staySchema);

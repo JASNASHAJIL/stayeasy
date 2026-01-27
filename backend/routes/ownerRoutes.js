@@ -1,10 +1,14 @@
-// routes/ownerRoutes.js
 const router = require("express").Router();
-const { addStay, uploadMiddleware, getOwnerStays } = require("../controllers/ownerController");
-const { verifyOwnerToken } = require("../middleware/authMiddleware");
+const authMiddleware = require("../middleware/authMiddleware");
 
-// Owner-only routes
-router.post("/add", verifyOwnerToken, uploadMiddleware, addStay);
-router.get("/my-stays", verifyOwnerToken, getOwnerStays);
+const {
+  addStay,
+  uploadMiddleware,
+  getOwnerStays,
+} = require("../controllers/ownerController");
+
+router.post("/add", authMiddleware, uploadMiddleware, addStay);
+router.get("/my-stays", authMiddleware, getOwnerStays);
 
 module.exports = router;
+

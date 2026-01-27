@@ -1,7 +1,14 @@
 const router = require("express").Router();
-const { getAllStays } = require("../controllers/stayController");
+const authMiddleware = require("../middleware/authMiddleware");
 
-// Public route for users
+const {
+  getAllStays,
+  searchStaysByTitle,
+  contactOwnerController,
+} = require("../controllers/stayController");
+
 router.get("/all", getAllStays);
+router.get("/search", searchStaysByTitle);
+router.get("/contact/:id", authMiddleware, contactOwnerController);
 
 module.exports = router;

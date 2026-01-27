@@ -13,7 +13,14 @@ export default function OwnerDashboard() {
       {loading && <p>Loading stays...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "15px", justifyContent: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "15px",
+          justifyContent: "center",
+        }}
+      >
         {stays.length === 0 && !loading && <p>No stays added yet.</p>}
         {stays.map((stay) => (
           <div
@@ -27,9 +34,18 @@ export default function OwnerDashboard() {
               boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
             }}
           >
+            {/* Show first image if available */}
+            {stay.images?.[0] && (
+              <img
+                src={stay.images[0].startsWith("http") ? stay.images[0] : `http://localhost:5000${stay.images[0]}`}
+                alt={stay.title}
+                style={{ width: "100%", height: "120px", borderRadius: "8px", objectFit: "cover", marginBottom: "10px" }}
+              />
+            )}
+
             <h3>{stay.title}</h3>
             <p>{stay.address}</p>
-            <p>Rent: {stay.rent}</p>
+            <p>Rent: ₹{stay.rent}</p>
             <p>Type: {stay.type}</p>
             <p>Status: {stay.status}</p>
           </div>
@@ -37,7 +53,14 @@ export default function OwnerDashboard() {
       </div>
 
       {stays.length > 0 && (
-        <div style={{ height: "400px", marginTop: "30px", borderRadius: "12px", overflow: "hidden" }}>
+        <div
+          style={{
+            height: "400px",
+            marginTop: "30px",
+            borderRadius: "12px",
+            overflow: "hidden",
+          }}
+        >
           <MapContainer center={[20, 78]} zoom={5} style={{ height: "100%", width: "100%" }}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             {stays.map((stay) => (
@@ -45,7 +68,7 @@ export default function OwnerDashboard() {
                 <Popup>
                   <strong>{stay.title}</strong>
                   <p>{stay.address}</p>
-                  <p>Rent: {stay.rent}</p>
+                  <p>Rent: ₹{stay.rent}</p>
                   <p>Status: {stay.status}</p>
                 </Popup>
               </Marker>

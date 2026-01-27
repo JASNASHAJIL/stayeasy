@@ -121,7 +121,7 @@ export default function SignupPage() {
         <select value={role} onChange={e => setRole(e.target.value)}>
           <option value="user">User</option>
           <option value="owner">Owner</option>
-          <option value="admin">Admin</option>
+          
         </select>
         <button onClick={handleSignup}>Register</button>
         <p>Already have an account? <a href="/login">Login here</a></p>

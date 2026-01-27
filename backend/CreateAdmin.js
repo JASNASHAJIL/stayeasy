@@ -1,12 +1,11 @@
 const Admin = require("./models/Admin");
-const bcrypt = require("bcryptjs");
 
 async function createDefaultAdmin() {
   try {
     const defaultPhone = process.env.DEFAULT_ADMIN_PHONE || "9999999999";
     const defaultName = process.env.DEFAULT_ADMIN_NAME || "Super Admin";
     const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || "admin";
-    const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || "admin123"; // temporary, must change later
+    const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || "admin123";
 
     const exists = await Admin.findOne({ phone: defaultPhone });
     if (exists) {
@@ -14,13 +13,11 @@ async function createDefaultAdmin() {
       return;
     }
 
-    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-
     await Admin.create({
       name: defaultName,
       phone: defaultPhone,
       username: defaultUsername,
-      password: hashedPassword,
+      password: defaultPassword, // plain, will be hashed by pre-save hook
       role: "admin",
     });
 
