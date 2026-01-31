@@ -4,18 +4,38 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
+const http = require("http");                 // 🆕
+const { Server } = require("socket.io");      // 🆕
+
 
 // -------------------- ROUTES --------------------
 const authRoutes = require("./routes/authRoutes");
 const ownerRoutes = require("./routes/ownerRoutes");
 const stayRoutes = require("./routes/stayRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const chatRoutes = require("./routes/chatRoute");
+
+
+// -------------------- SOCKET --------------------
+const socketHandler = require("./socket/socket"); // 🆕
 
 // -------------------- DEFAULT ADMIN --------------------
 const createDefaultAdmin = require("./CreateAdmin");
 
 // -------------------- INIT APP --------------------
 const app = express();
+const server = http.createServer(app);         // 🆕
+
+// -------------------- SOCKET INIT --------------------
+const io = new Server(server, {                // 🆕
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+// Attach socket logic
+socketHandler(io);                             // 🆕
 
 // -------------------- MIDDLEWARES --------------------
 app.use(cors());
@@ -26,10 +46,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // -------------------- ROUTES --------------------
-app.use("/api", authRoutes);         // Login / Register / OTP
-app.use("/api/owner", ownerRoutes);       // Owner → Add / Get Stays
-app.use("/api/stay", stayRoutes);         // Stays + Admin approval
-app.use("/api/admin", adminRoutes);       // Admin panel
+app.use("/api/chat", chatRoutes);
+app.use("/api", authRoutes);
+app.use("/api/owner", ownerRoutes);
+app.use("/api/stay", stayRoutes);
+app.use("/api/admin", adminRoutes);
 
 // -------------------- DATABASE & SERVER --------------------
 const PORT = process.env.PORT || 5000;
@@ -39,10 +60,11 @@ const startServer = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("✅ MongoDB connected");
 
-    // Create default admin if not exists
     await createDefaultAdmin();
 
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    server.listen(PORT, () =>                 // 🆕
+      console.log(`🚀 Server running on port ${PORT}`)
+    );
   } catch (err) {
     console.error("❌ Database connection failed:", err);
     process.exit(1);

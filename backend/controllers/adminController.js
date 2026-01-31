@@ -17,7 +17,7 @@ exports.getAllUsers = async (req, res) => {
 // ------------------ GET ALL OWNERS ------------------
 exports.getAllOwners = async (req, res) => {
   try {
-    const owners = await User.find({role:"owner"}).sort({ createdAt: -1 });
+    const owners = await Owner.find({role:"owner"}).sort({ createdAt: -1 });
     res.json({ success: true, owners });
   } catch (err) {
     console.error("Get All Owners Error:", err);

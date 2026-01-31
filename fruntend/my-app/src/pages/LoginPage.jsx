@@ -25,7 +25,7 @@ export default function LoginPage() {
   isSubscribed: u.isSubscribed
 };
 
-localStorage.setItem("user", JSON.stringify(userData));
+localStorage.setItem("token",token);
 login(userData);
 
 

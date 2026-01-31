@@ -23,8 +23,9 @@ export default function AddStay() {
     if (isNaN(lat) || isNaN(lng)) return alert("Latitude and Longitude must be numbers");
 
     const token = localStorage.getItem("token");
+    console.log(token)
     if (!token) return alert("You must be logged in to add a stay");
-
+      
     const formData = new FormData();
     formData.append("title", title);
     formData.append("rent", rent);
