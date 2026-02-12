@@ -68,7 +68,8 @@ export const ChatProvider = ({ children }) => {
 
   // Calculate total unread
   useEffect(() => {
-    setTotalUnread(rooms.reduce((acc, room) => acc + (room.unreadCount || 0), 0));
+    console.log(rooms)
+   // setTotalUnread(rooms?.reduce((acc, room) => acc + (room.unreadCount || 0), 0));
   }, [rooms]);
 
   // 1) Socket connect + listeners

@@ -34,7 +34,7 @@ app.use(
   cors({
     origin: true,
     credentials: true,
-  })
+ } )
 );
 
 // ✅ Serve uploaded images statically

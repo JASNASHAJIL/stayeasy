@@ -2,10 +2,9 @@ import axios from "axios";
 
 // Create an axios instance with base URL
 const API = axios.create({
-  baseURL: "/api",
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true
 });
-
 // Add a request interceptor to include token if it exists
 API.interceptors.request.use(
   (config) => {
