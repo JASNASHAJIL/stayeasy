@@ -130,7 +130,7 @@ const UserMapPage = () => {
       });
   }, []);
 
-  const API_BASE_URL = "http://localhost:5000";
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   const getImageUrl = (img) => {
     if (!img) return "https://placehold.co/600x400?text=No+Image";
