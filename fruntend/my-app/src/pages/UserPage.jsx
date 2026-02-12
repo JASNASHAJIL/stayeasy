@@ -41,7 +41,7 @@ const styles = {
     alignItems: "center",
     position: "sticky",
     top: 0,
-    zIndex: 90,
+    zIndex: 1000,
     flexWrap: "wrap",
     gap: "16px",
     boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
@@ -296,11 +296,14 @@ const styles = {
   },
 };
 
+// Use environment variable for API URL in production, fallback to localhost for dev
+const API_BASE_URL = "http://localhost:5000";
+
 const getImageUrl = (img) => {
   if (!img) return "https://placehold.co/600x400?text=No+Image";
-  if (img.startsWith("http")) return img;
+  if (img.startsWith("http") || img.startsWith("data:")) return img;
   if (img.startsWith("photo-")) return `https://images.unsplash.com/${img}?w=600&h=400&fit=crop`;
-  return `http://localhost:5000${img.startsWith("/") ? "" : "/"}${img}`;
+  return `${API_BASE_URL}${img.startsWith("/") ? "" : "/"}${img}`;
 };
 
 const ImageSlider = ({ images = [], title }) => {

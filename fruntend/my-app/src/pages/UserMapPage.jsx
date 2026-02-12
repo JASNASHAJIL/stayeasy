@@ -130,11 +130,13 @@ const UserMapPage = () => {
       });
   }, []);
 
+  const API_BASE_URL = "http://localhost:5000";
+
   const getImageUrl = (img) => {
     if (!img) return "https://placehold.co/600x400?text=No+Image";
-    if (img.startsWith("http")) return img;
+    if (img.startsWith("http") || img.startsWith("data:")) return img;
     if (img.startsWith("photo-")) return `https://images.unsplash.com/${img}?w=600&h=400&fit=crop`;
-    return `http://localhost:5000${img.startsWith("/") ? "" : "/"}${img}`;
+    return `${API_BASE_URL}${img.startsWith("/") ? "" : "/"}${img}`;
   };
 
   return (
