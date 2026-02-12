@@ -32,7 +32,8 @@ app.use(express.urlencoded({ extended: true }));
 // But keep it safe for dev + production.
 app.use(
   cors({
-    origin: true,
+    origin: [process.env.FRONTEND_URL, "http://localhost:5173"],
+    
     credentials: true,
  } )
 );
