@@ -1,11 +1,17 @@
 import { io } from "socket.io-client";
 
-const socket = io("/", {
+const socket = io( import.meta.env.VITE_SOCKET_URL, {
   autoConnect: false,
+
+  // ✅ more stable than long-polling in many dev setups
   transports: ["websocket"],
+
+  // ✅ retries when backend restarts
   reconnection: true,
   reconnectionAttempts: 10,
-  reconnectionDelay: 1000,
+  reconnectionDelay: 800,
+
+  // optional (helps if you later use cookies)
   withCredentials: true,
 });
 
