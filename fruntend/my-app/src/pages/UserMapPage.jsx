@@ -112,6 +112,13 @@ const UserMapPage = () => {
   const [stays, setStays] = useState([]);
   const navigate = useNavigate();
   const [isBackButtonHovered, setIsBackButtonHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     API.get("/stay/search") // Fetch all approved stays
@@ -132,20 +139,28 @@ const UserMapPage = () => {
 
   return (
     <div style={styles.pageWrapper}>
-      <header style={styles.header}>
-        <div style={styles.brand} onClick={() => navigate("/")}>
-          <span>🗺️</span> StayEase Map
+      <header style={{
+        ...styles.header,
+        padding: isMobile ? "0 16px" : "0 32px",
+        height: isMobile ? "60px" : "70px"
+      }}>
+        <div style={{
+          ...styles.brand,
+          fontSize: isMobile ? "1.2rem" : "1.4rem"
+        }} onClick={() => navigate("/")}>
+          <span>🗺️</span> {isMobile ? "Map" : "StayEase Map"}
         </div>
         <button 
           style={{
             ...styles.backButton,
+            padding: isMobile ? "8px 12px" : "10px 20px",
             ...(isBackButtonHovered && { background: colors.professionalRedHover })
           }}
           onClick={() => navigate("/")}
           onMouseEnter={() => setIsBackButtonHovered(true)}
           onMouseLeave={() => setIsBackButtonHovered(false)}
         >
-          ← Back to List
+          {isMobile ? "← Back" : "← Back to List"}
         </button>
       </header>
 

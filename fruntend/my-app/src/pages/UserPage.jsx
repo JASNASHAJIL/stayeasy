@@ -33,29 +33,18 @@ const styles = {
     display: "flex",
     flexDirection: "column",
   },
-  header: {
-    background: "rgba(255, 255, 255, 0.8)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
-    height: "80px",
-    padding: "0 40px",
-    borderBottom: `1px solid ${colors.border}`,
+  actionBar: {
+    background: colors.bg,
+    padding: "16px 24px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     position: "sticky",
     top: 0,
-    zIndex: 100,
-  },
-  brand: {
-    fontSize: "1.5rem",
-    fontWeight: "800",
-    color: colors.primary,
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    cursor: "pointer",
-    letterSpacing: "-0.025em",
+    zIndex: 90,
+    flexWrap: "wrap",
+    gap: "16px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
   },
   searchForm: {
     display: "flex",
@@ -89,7 +78,7 @@ const styles = {
   navRight: {
     display: "flex",
     alignItems: "center",
-    gap: "32px",
+    gap: "16px",
   },
   navItem: {
     fontSize: "0.9rem",
@@ -101,30 +90,10 @@ const styles = {
     alignItems: "center",
     gap: "6px",
   },
-  userProfile: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    paddingLeft: "24px",
-    borderLeft: `1px solid ${colors.border}`,
-  },
-  avatar: {
-    width: "42px",
-    height: "42px",
-    borderRadius: "12px",
-    background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryHover})`,
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "700",
-    fontSize: "1.1rem",
-    boxShadow: "0 4px 12px rgba(99, 102, 241, 0.25)",
-  },
   filterBar: {
     display: 'flex',
-    gap: '20px',
-    padding: '24px 40px',
+    gap: '16px',
+    padding: '24px 24px',
     maxWidth: '1400px',
     margin: '0 auto',
     width: '100%',
@@ -136,7 +105,7 @@ const styles = {
     minWidth: '200px',
   },
   mainContent: {
-    padding: "0 40px 40px",
+    padding: "0 24px 40px",
     maxWidth: "1400px",
     margin: "0 auto",
     width: "100%",
@@ -180,8 +149,8 @@ const styles = {
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-    gap: "32px",
+    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gap: "24px",
   },
   card: {
     background: colors.cardBg,
@@ -460,7 +429,13 @@ export default function UserPage() {
   const [isSearchHovered, setIsSearchHovered] = useState(false);
   const [isRetryHovered, setIsRetryHovered] = useState(false);
   const [isMapLinkHovered, setIsMapLinkHovered] = useState(false);
-  const [isAddStayHovered, setIsAddStayHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchStays = () => {
     setLoading(true);
@@ -582,13 +557,15 @@ export default function UserPage() {
 
   return (
     <div style={styles.pageWrapper}>
-      {/* Header + Search */}
-      <header style={styles.header}>
-        <div style={styles.brand} onClick={() => navigate("/")}>
-          <span style={{fontSize: '1.8rem'}}>🏨</span> StayEase
-        </div>
+      {/* Search & Actions Bar */}
+      <div style={styles.actionBar}>
 
-        <form onSubmit={handleSearch} style={styles.searchForm}>
+        <form onSubmit={handleSearch} style={{
+          ...styles.searchForm,
+          order: isMobile ? 2 : 0,
+          maxWidth: isMobile ? '100%' : '480px',
+          margin: isMobile ? '8px 0' : '0'
+        }}>
           <input
             type="text"
             placeholder="Search by title..."
@@ -623,42 +600,15 @@ export default function UserPage() {
           >
             🗺️ Map View
           </span>
-          {user?.role === "owner" && (
-            <span
-              style={{
-                ...styles.navItem,
-                ...(isAddStayHovered && { color: colors.primary })
-              }}
-              onClick={() => navigate("/add-stay")}
-              onMouseEnter={() => setIsAddStayHovered(true)}
-              onMouseLeave={() => setIsAddStayHovered(false)}
-            >
-              ➕ Add Stay
-            </span>
-          )}
           {user ? (
             <>
               <div style={styles.statusBox(user.isSubscribed)}>
                 {user.isSubscribed ? "Premium Plan" : "Free Plan"}
               </div>
-              <div style={styles.userProfile}>
-                <div style={styles.avatar}>
-                  {user.name ? user.name.charAt(0).toUpperCase() : "G"}
-                </div>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <span style={{ fontWeight: "700", fontSize: "0.9rem" }}>{user.name || "Guest"}</span>
-                  <span style={{ fontSize: "0.75rem", color: colors.textSecondary }}>{user.role || "Visitor"}</span>
-                </div>
-              </div>
             </>
-          ) : (
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => navigate('/login')} style={{...styles.buttonBase, ...styles.secondaryButton, padding: '8px 16px'}}>Login</button>
-              <button onClick={() => navigate('/signup')} style={{...styles.buttonBase, ...styles.primaryButton, padding: '8px 16px'}}>Sign Up</button>
-            </div>
-          )}
+          ) : null}
         </div>
-      </header>
+      </div>
 
       <div style={styles.filterBar}>
         <div style={styles.filterGroup}>

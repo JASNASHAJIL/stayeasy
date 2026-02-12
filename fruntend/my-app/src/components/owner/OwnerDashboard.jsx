@@ -66,7 +66,7 @@ export default function OwnerDashboard() {
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           <div style={{ position: "relative", width: "80px", height: "80px" }}>
             <img 
-              src={user?.profilePic ? `http://localhost:5000${user.profilePic}` : "https://placehold.co/100x100?text=Profile"} 
+              src={user?.profilePic ? (user.profilePic.startsWith("http") ? user.profilePic : `http://localhost:5000${user.profilePic}`) : "https://placehold.co/100x100?text=Profile"} 
               alt="Profile" 
               style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", border: "3px solid #e2e8f0" }}
               onError={(e) => e.target.src = "https://placehold.co/100x100?text=Profile"}
