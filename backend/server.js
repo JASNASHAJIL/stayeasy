@@ -66,7 +66,7 @@ app.get(/^(?!\/api).*/, (req, res) => {
 // ✅ If frontend is served from same domain, no need origin "*"
 const io = new Server(server, {
   cors: {
-    origin: true,
+    origin: [process.env.FRONTEND_URL, "http://localhost:5173"],
     methods: ["GET", "POST"],
     credentials: true,
   },
