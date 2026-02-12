@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
+import API from "../api";
 
 export const StayContext = createContext(null);
 
@@ -18,9 +19,7 @@ export const StayContextProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   // ---------- LOGIN ----------
-  const login = ({ token, name, role, _id }) => {
-    // Save everything in one object
-    const userData = { token, name, role, _id };
+  const login = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
   };
@@ -39,22 +38,21 @@ export const StayContextProvider = ({ children }) => {
     setError(null);
 
     try {
-      let url = "http://localhost:5000/api/stay/all";
-      const headers = {};
+      let endpoint = "/stay/all";
+      const config = {};
 
       if ((user.role === "owner" || user.role === "admin") && user.token) {
-        headers["Authorization"] = `Bearer ${user.token}`;
-        if (user.role === "owner") url = "http://localhost:5000/api/owner/my-stays";
+        config.headers = { Authorization: `Bearer ${user.token}` };
+        if (user.role === "owner") endpoint = "/owner/my-stays";
       }
 
-      const res = await fetch(url, { headers });
-      const data = await res.json();
+      const { data } = await API.get(endpoint, config);
 
       if (data.success) setStays(data.stays || []);
       else setError(data.message || "Failed to fetch stays");
     } catch (err) {
       console.error("Fetch stays error:", err);
-      setError("Network error while fetching stays");
+      setError(err.response?.data?.message || "Network error - Is backend running?");
     } finally {
       setLoading(false);
     }

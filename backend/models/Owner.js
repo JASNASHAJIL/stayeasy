@@ -12,6 +12,11 @@ const ownerSchema = new mongoose.Schema({
     enum: ["pending", "approved", "rejected"],
     default: "pending", // new owners start as pending
   },
+  profilePic: { type: String, default: "" },
+
+  // ✅ Status
+  isOnline: { type: Boolean, default: false },
+  lastSeen: { type: Date },
 }, { timestamps: true });
 
 

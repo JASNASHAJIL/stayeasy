@@ -47,6 +47,10 @@ const userSchema = new mongoose.Schema(
     // 🔐 Forgot password
     resetOtp: { type: String },
     otpExpiry: { type: Date },
+
+    // ✅ Status
+    isOnline: { type: Boolean, default: false },
+    lastSeen: { type: Date },
   },
   { timestamps: true }
 );

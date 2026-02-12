@@ -16,6 +16,7 @@ const messageSchema = new mongoose.Schema({
     required: true,
   },
   text: String,
+  imageUrl: { type: String, default: null },
 
   status: {
     type: String,

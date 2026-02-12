@@ -6,108 +6,142 @@ import { StayContext } from "../../context/StayContext";
 // ---------------- STYLES ----------------
 const styles = {
   container: {
-    padding: "30px",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    padding: "40px",
+    fontFamily: "'Inter', sans-serif",
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #f0f8ff, #e6f7ff)",
+    backgroundColor: "#f8fafc",
+    color: "#1e293b",
   },
   title: {
     textAlign: "center",
     fontSize: "2.5rem",
-    color: "#1e3a8a",
-    marginBottom: "30px",
+    fontWeight: "800",
+    color: "#1e293b",
+    marginBottom: "40px",
   },
   tabContainer: {
     display: "flex",
     justifyContent: "center",
-    marginBottom: "30px",
-    gap: "20px",
+    marginBottom: "40px",
+    background: "#e2e8f0",
+    borderRadius: "12px",
+    padding: "6px",
+    maxWidth: "400px",
+    margin: "0 auto 40px auto",
   },
   tab: {
-    padding: "10px 25px",
+    flex: 1,
+    padding: "10px 20px",
     borderRadius: "8px",
     border: "none",
-    background: "#38bdf8",
-    color: "#fff",
+    background: "transparent",
+    color: "#475569",
     cursor: "pointer",
     fontWeight: 600,
     transition: "0.3s",
+    fontSize: "1rem",
   },
   activeTab: {
-    padding: "10px 25px",
+    flex: 1,
+    padding: "10px 20px",
     borderRadius: "8px",
     border: "none",
-    background: "#0f172a",
-    color: "#fff",
+    background: "#ffffff",
+    color: "#1e3a8a",
     cursor: "pointer",
     fontWeight: 600,
     transition: "0.3s",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+    fontSize: "1rem",
   },
   sectionTitle: {
     fontSize: "1.8rem",
-    color: "#1e3a8a",
+    fontWeight: "700",
+    color: "#1e293b",
     marginBottom: "20px",
+    borderBottom: "1px solid #e2e8f0",
+    paddingBottom: "10px",
   },
   cardGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "20px",
-    marginBottom: "30px",
+    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gap: "24px",
   },
   card: {
-    background: "#a5f3fc",
+    background: "#ffffff",
     padding: "20px",
     borderRadius: "15px",
-    boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-    textAlign: "center",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+    transition: "all 0.3s",
+    border: "1px solid #e2e8f0",
+  },
+  ownersPageLayout: {
+    display: "grid",
+    gridTemplateColumns: "350px 1fr",
+    gap: "40px",
+    alignItems: "flex-start",
+  },
+  ownerListContainer: {
+    background: "#ffffff",
+    borderRadius: "16px",
+    padding: "10px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+    maxHeight: "70vh",
+    overflowY: "auto",
+  },
+  ownerListItem: {
+    padding: "15px",
+    borderRadius: "10px",
     cursor: "pointer",
-    transition: "0.3s",
+    marginBottom: "8px",
+    border: "1px solid transparent",
   },
-  ownersContainer: {
-    display: "flex",
-    gap: "30px",
-    flexWrap: "wrap",
-  },
-  ownerStays: {
-    flex: 1,
-    minWidth: "300px",
+  ownerDetailContainer: {
+    background: "#ffffff",
+    borderRadius: "16px",
+    padding: "30px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
   },
   stayCard: {
-    background: "#fcd34d",
-    padding: "15px",
+    background: "#f8fafc",
+    padding: "20px",
     marginBottom: "15px",
     borderRadius: "12px",
-    boxShadow: "0 6px 15px rgba(0,0,0,0.2)",
+    border: "1px solid #e2e8f0",
   },
   buttonContainer: {
     display: "flex",
     gap: "10px",
-    marginTop: "10px",
+    marginTop: "15px",
     justifyContent: "center",
   },
   approveBtn: {
-    background: "#22c55e",
+    background: "#10b981",
     border: "none",
-    padding: "8px 12px",
-    borderRadius: "6px",
+    padding: "8px 16px",
+    borderRadius: "8px",
     color: "#fff",
     cursor: "pointer",
     fontWeight: 600,
     transition: "0.3s",
   },
   rejectBtn: {
-    background: "#ef4444",
+    background: "#f43f5e",
     border: "none",
-    padding: "8px 12px",
-    borderRadius: "6px",
+    padding: "8px 16px",
+    borderRadius: "8px",
     color: "#fff",
     cursor: "pointer",
     fontWeight: 600,
     transition: "0.3s",
   },
   noData: {
+    padding: "40px",
+    textAlign: "center",
     fontStyle: "italic",
-    color: "#334155",
+    color: "#64748b",
+    background: "#f8fafc",
+    borderRadius: "12px",
   },
 };
 
@@ -168,9 +202,7 @@ export default function AdminDashboard() {
   // ---------------- APPROVE / REJECT STAY ----------------
   const handleApproveStay = async (stayId, ownerId) => {
     try {
-      const res = await API.put(`/admin/approve-stay/${stayId}`, {}, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
+      const res = await API.put(`/admin/stays/${stayId}/approve`, {}, { headers: { Authorization: `Bearer ${user.token}` } });
       if (res.data.success) {
         alert("Stay approved");
         fetchOwnerStays(ownerId);
@@ -183,9 +215,7 @@ export default function AdminDashboard() {
 
   const handleRejectStay = async (stayId, ownerId) => {
     try {
-      const res = await API.put(`/admin/reject-stay/${stayId}`, {}, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
+      const res = await API.put(`/admin/stays/${stayId}/reject`, {}, { headers: { Authorization: `Bearer ${user.token}` } });
       if (res.data.success) {
         alert("Stay rejected");
         fetchOwnerStays(ownerId);
@@ -268,7 +298,7 @@ export default function AdminDashboard() {
             ) : (
               users.map((u) => (
                 <div key={u._id} style={styles.card}>
-                  <h3>{u.name}</h3>
+                  <h3 style={{ margin: '0 0 8px 0' }}>{u.name}</h3>
                   <p>Username: {u.username}</p>
                   <p>Phone: {u.phone}</p>
                 </div>
@@ -281,81 +311,41 @@ export default function AdminDashboard() {
       {/* ---------- OWNERS TAB ---------- */}
       {activeTab === "owners" && (
         <div>
-          <h2 style={styles.sectionTitle}>All Owners</h2>
-          <div style={styles.cardGrid}>
-            {owners.length === 0 ? (
-              <p style={styles.noData}>No owners found.</p>
-            ) : (
-              owners.map((o) => (
-                <div
-                  key={o._id}
-                  style={{
-                    ...styles.card,
-                    border: selectedOwner?._id === o._id ? "3px solid #0f172a" : "none",
-                  }}
-                >
-                  <h3>{o.name}</h3>
-                  <p>Username: {o.username}</p>
-                  <p>Phone: {o.phone}</p>
-                  <p>Status: {o.status || "pending"}</p>
-
-                  {/* Owner Approve/Reject */}
-                  {o.status === "pending" && (
-                    <div style={styles.buttonContainer}>
-                      <button
-                        style={styles.approveBtn}
-                        onClick={() => handleApproveOwner(o._id)}
-                      >
-                        Approve
-                      </button>
-                      <button
-                        style={styles.rejectBtn}
-                        onClick={() => handleRejectOwner(o._id)}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  )}
-
-                  <button
-                    style={{ marginTop: "10px", ...styles.tab }}
+          <h2 style={styles.sectionTitle}>Owner Management</h2>
+          <div style={styles.ownersPageLayout}>
+            <div style={styles.ownerListContainer}>
+              {owners.length === 0 ? (
+                <p style={styles.noData}>No owners found.</p>
+              ) : (
+                owners.map((o) => (
+                  <div
+                    key={o._id}
+                    style={{
+                      ...styles.ownerListItem,
+                      background: selectedOwner?._id === o._id ? "#eef2ff" : "transparent",
+                      border: selectedOwner?._id === o._id ? "1px solid #c7d2fe" : "1px solid transparent",
+                    }}
                     onClick={() => {
                       setSelectedOwner(o);
                       fetchOwnerStays(o._id);
                     }}
                   >
-                    View Stays
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Owner stays */}
-          {selectedOwner && (
-            <div style={styles.ownerStays}>
-              <h2>Stays by {selectedOwner.name}</h2>
-              {ownerStays.length === 0 ? (
-                <p style={styles.noData}>No stays found.</p>
-              ) : (
-                ownerStays.map((stay) => (
-                  <div key={stay._id} style={styles.stayCard}>
-                    <h3>{stay.title}</h3>
-                    <p>Type: {stay.type}</p>
-                    <p>Rent: ₹{stay.rent}</p>
-                    <p>Address: {stay.address}</p>
-                    <p>Status: {stay.status}</p>
-                    {stay.status === "pending" && (
+                    <h3 style={{ margin: '0 0 8px 0' }}>{o.name}</h3>
+                    <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>{o.phone}</p>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '14px', fontWeight: '600', color: o.status === 'approved' ? '#16a34a' : o.status === 'rejected' ? '#dc2626' : '#ca8a04' }}>
+                      Status: {o.status || "pending"}
+                    </p>
+                    {o.status === "pending" && (
                       <div style={styles.buttonContainer}>
                         <button
                           style={styles.approveBtn}
-                          onClick={() => handleApproveStay(stay._id, selectedOwner._id)}
+                          onClick={(e) => { e.stopPropagation(); handleApproveOwner(o._id); }}
                         >
                           Approve
                         </button>
                         <button
                           style={styles.rejectBtn}
-                          onClick={() => handleRejectStay(stay._id, selectedOwner._id)}
+                          onClick={(e) => { e.stopPropagation(); handleRejectOwner(o._id); }}
                         >
                           Reject
                         </button>
@@ -365,7 +355,44 @@ export default function AdminDashboard() {
                 ))
               )}
             </div>
-          )}
+
+            <div style={styles.ownerDetailContainer}>
+              {selectedOwner ? (
+                <>
+                  <h2 style={{...styles.sectionTitle, border: 'none', padding: 0}}>Stays by {selectedOwner.name}</h2>
+                  {ownerStays.length === 0 ? (
+                    <p style={styles.noData}>No stays found for this owner.</p>
+                  ) : (
+                    ownerStays.map((stay) => (
+                      <div key={stay._id} style={styles.stayCard}>
+                        <h3 style={{ margin: '0 0 8px 0' }}>{stay.title}</h3>
+                        <p>Rent: ₹{stay.rent}</p>
+                        <p>Status: {stay.status}</p>
+                        {stay.status === "pending" && (
+                          <div style={styles.buttonContainer}>
+                            <button
+                              style={styles.approveBtn}
+                              onClick={() => handleApproveStay(stay._id, selectedOwner._id)}
+                            >
+                              Approve Stay
+                            </button>
+                            <button
+                              style={styles.rejectBtn}
+                              onClick={() => handleRejectStay(stay._id, selectedOwner._id)}
+                            >
+                              Reject Stay
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </>
+              ) : (
+                <div style={styles.noData}>Select an owner to view their stays.</div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
