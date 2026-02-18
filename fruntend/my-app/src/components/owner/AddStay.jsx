@@ -41,7 +41,7 @@ export default function AddStay() {
 
     try {
       setLoading(true);
-      const res = await API.post("/owner/add", formData, {
+      const res = await API.post("/stay", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
