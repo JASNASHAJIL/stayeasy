@@ -45,6 +45,7 @@ const styles = {
     flexWrap: "wrap",
     gap: "16px",
     boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+    borderBottom: `1px solid ${colors.border}`,
   },
   searchForm: {
     display: "flex",
@@ -55,6 +56,7 @@ const styles = {
   },
   searchInput: {
     flex: 1,
+    minWidth: 0, // ✅ important for mobile overflow
     padding: "12px 20px",
     borderRadius: "12px 0 0 12px",
     border: `1px solid ${colors.border}`,
@@ -74,6 +76,7 @@ const styles = {
     fontWeight: "600",
     fontSize: "0.95rem",
     transition: "background-color 0.2s",
+    whiteSpace: "nowrap",
   },
   navRight: {
     display: "flex",
@@ -91,18 +94,18 @@ const styles = {
     gap: "6px",
   },
   filterBar: {
-    display: 'flex',
-    gap: '16px',
-    padding: '24px 24px',
-    maxWidth: '1400px',
-    margin: '0 auto',
-    width: '100%',
-    alignItems: 'flex-end',
-    flexWrap: 'wrap',
+    display: "flex",
+    gap: "16px",
+    padding: "24px 24px",
+    maxWidth: "1400px",
+    margin: "0 auto",
+    width: "100%",
+    alignItems: "flex-end",
+    flexWrap: "wrap",
   },
   filterGroup: {
     flex: 1,
-    minWidth: '200px',
+    minWidth: "200px",
   },
   mainContent: {
     padding: "0 24px 40px",
@@ -112,29 +115,30 @@ const styles = {
     flex: 1,
   },
   filterLabel: {
-    fontSize: '0.85rem',
-    fontWeight: '600',
+    fontSize: "0.85rem",
+    fontWeight: "600",
     color: colors.textSecondary,
-    marginBottom: '12px',
-    display: 'block',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
+    marginBottom: "12px",
+    display: "block",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
   },
   filterSelect: {
-    width: '100%',
-    padding: '12px 16px',
-    borderRadius: '10px',
+    width: "100%",
+    padding: "12px 16px",
+    borderRadius: "10px",
     border: `1px solid ${colors.border}`,
-    fontSize: '0.95rem',
+    fontSize: "0.95rem",
     background: colors.white,
     color: colors.textPrimary,
-    cursor: 'pointer',
-    outline: 'none',
-    appearance: 'none', // Remove default arrow
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3F%3E%3C/svg%3E")`,
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'right 16px center',
-    backgroundSize: '16px',
+    cursor: "pointer",
+    outline: "none",
+    appearance: "none",
+    // ✅ fixed SVG (removed broken %3F)
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "right 16px center",
+    backgroundSize: "16px",
   },
   statusBox: (isSubscribed) => ({
     padding: "6px 12px",
@@ -145,8 +149,7 @@ const styles = {
     color: isSubscribed ? colors.success : colors.danger,
     border: `1px solid ${isSubscribed ? colors.success : colors.danger}20`,
   }),
-  centerContent: {
-  },
+  centerContent: {},
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
@@ -200,6 +203,7 @@ const styles = {
     display: "flex",
     gap: "8px",
     marginBottom: "16px",
+    flexWrap: "wrap",
   },
   badge: {
     padding: "4px 12px",
@@ -217,13 +221,13 @@ const styles = {
     fontSize: "0.9rem",
     marginBottom: "8px",
   },
-  cardButtons: {
+  cardButtons: (isMobile) => ({
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
     gap: "12px",
     marginTop: "auto",
     paddingTop: "20px",
-  },
+  }),
   buttonBase: {
     padding: "10px",
     fontSize: "0.9rem",
@@ -288,7 +292,7 @@ const styles = {
     transition: "all 0.2s",
   },
   mapContainer: {
-    height: "400px",
+    height: "min(400px, 55vh)", // ✅ responsive height
     marginTop: "24px",
     borderRadius: "12px",
     overflow: "hidden",
@@ -297,13 +301,24 @@ const styles = {
 };
 
 // Use environment variable for API URL in production, fallback to localhost for dev
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_BASE_URL =
+  (import.meta.env && import.meta.env.VITE_API_URL) ||
+  (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
+  "http://localhost:5000";
+const SERVER_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
 const getImageUrl = (img) => {
   if (!img) return "https://placehold.co/600x400?text=No+Image";
-  if (img.startsWith("http") || img.startsWith("data:")) return img;
-  if (img.startsWith("photo-")) return `https://images.unsplash.com/${img}?w=600&h=400&fit=crop`;
-  return `${API_BASE_URL}${img.startsWith("/") ? "" : "/"}${img}`;
+  let imgPath = img.toString().replace(/\\/g, "/");
+  if (imgPath.startsWith("http") || imgPath.startsWith("data:")) return imgPath;
+  if (imgPath.startsWith("photo-"))
+    return `https://images.unsplash.com/${imgPath}?w=600&h=400&fit=crop`;
+
+  if (!imgPath.includes("uploads/")) {
+    imgPath = `uploads/${imgPath.startsWith("/") ? imgPath.slice(1) : imgPath}`;
+  }
+
+  return `${SERVER_URL}${imgPath.startsWith("/") ? "" : "/"}${imgPath}`;
 };
 
 const ImageSlider = ({ images = [], title }) => {
@@ -314,7 +329,7 @@ const ImageSlider = ({ images = [], title }) => {
     if (!hasMultipleImages) return;
     const timer = setTimeout(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 4000); // Change image every 4 seconds
+    }, 4000);
     return () => clearTimeout(timer);
   }, [currentIndex, images.length, hasMultipleImages]);
 
@@ -336,78 +351,129 @@ const ImageSlider = ({ images = [], title }) => {
   };
 
   const sliderStyles = {
-    height: '100%',
-    position: 'relative',
-    transition: 'transform 0.4s ease',
+    height: "100%",
+    position: "relative",
+    transition: "transform 0.4s ease",
   };
 
   const arrowStyles = {
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
+    position: "absolute",
+    top: "50%",
+    transform: "translateY(-50%)",
     zIndex: 2,
-    cursor: 'pointer',
-    color: 'white',
-    background: 'rgba(0, 0, 0, 0.4)',
-    borderRadius: '50%',
-    width: '32px',
-    height: '32px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    border: 'none',
-    fontSize: '1.5rem',
+    cursor: "pointer",
+    color: "white",
+    background: "rgba(0, 0, 0, 0.4)",
+    borderRadius: "50%",
+    width: "32px",
+    height: "32px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "none",
+    fontSize: "1.5rem",
     opacity: 0,
-    transition: 'opacity 0.3s',
+    transition: "opacity 0.3s",
   };
 
   const dotsContainerStyles = {
-    position: 'absolute',
-    bottom: '15px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    display: 'flex',
-    gap: '8px',
+    position: "absolute",
+    bottom: "15px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    display: "flex",
+    gap: "8px",
     zIndex: 2,
   };
 
   const dotStyle = (index) => ({
-    width: '10px',
-    height: '10px',
-    borderRadius: '50%',
-    background: index === currentIndex ? colors.white : 'rgba(255, 255, 255, 0.7)',
-    cursor: 'pointer',
-    transition: 'background 0.3s',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+    width: "10px",
+    height: "10px",
+    borderRadius: "50%",
+    background:
+      index === currentIndex ? colors.white : "rgba(255, 255, 255, 0.7)",
+    cursor: "pointer",
+    transition: "background 0.3s",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
   });
 
   const handleSliderHover = (e) => {
     if (!hasMultipleImages) return;
-    const arrows = e.currentTarget.querySelectorAll('.slider-arrow');
-    arrows.forEach(arrow => arrow.style.opacity = e.type === 'mouseenter' ? 1 : 0);
+    const arrows = e.currentTarget.querySelectorAll(".slider-arrow");
+    arrows.forEach(
+      (arrow) => (arrow.style.opacity = e.type === "mouseenter" ? 1 : 0)
+    );
   };
 
   return (
-    <div style={{ height: '100%', position: 'relative' }} onMouseEnter={handleSliderHover} onMouseLeave={handleSliderHover}>
+    <div
+      style={{ height: "100%", position: "relative" }}
+      onMouseEnter={handleSliderHover}
+      onMouseLeave={handleSliderHover}
+      aria-label={title}
+    >
       <div style={sliderStyles} className="image-slider">
         {hasMultipleImages && (
           <>
-            <button className="slider-arrow" style={{ ...arrowStyles, left: '15px' }} onClick={goToPrevious}>‹</button>
-            <button className="slider-arrow" style={{ ...arrowStyles, right: '15px' }} onClick={goToNext}>›</button>
+            <button
+              className="slider-arrow"
+              style={{ ...arrowStyles, left: "15px" }}
+              onClick={goToPrevious}
+              type="button"
+              aria-label="Previous image"
+            >
+              ‹
+            </button>
+            <button
+              className="slider-arrow"
+              style={{ ...arrowStyles, right: "15px" }}
+              onClick={goToNext}
+              type="button"
+              aria-label="Next image"
+            >
+              ›
+            </button>
             <div style={dotsContainerStyles}>
               {images.map((_, slideIndex) => (
-                <div key={slideIndex} style={dotStyle(slideIndex)} onClick={(e) => goToSlide(e, slideIndex)} />
+                <div
+                  key={slideIndex}
+                  style={dotStyle(slideIndex)}
+                  onClick={(e) => goToSlide(e, slideIndex)}
+                />
               ))}
             </div>
           </>
         )}
-        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <div style={{ width: "100%", height: "100%", position: "relative" }}>
           {images.length > 0 ? (
             images.map((img, index) => (
-              <div key={index} style={{ width: '100%', height: '100%', backgroundPosition: 'center', backgroundSize: 'cover', backgroundImage: `url(${getImageUrl(img)})`, transition: 'opacity 0.8s ease-in-out', opacity: index === currentIndex ? 1 : 0, position: 'absolute', top: 0, left: 0 }} />
+              <div
+                key={index}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  backgroundPosition: "center",
+                  backgroundSize: "cover",
+                  backgroundImage: `url("${getImageUrl(img)}")`,
+                  transition: "opacity 0.8s ease-in-out",
+                  opacity: index === currentIndex ? 1 : 0,
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                }}
+              />
             ))
           ) : (
-            <div style={{ width: '100%', height: '100%', backgroundPosition: 'center', backgroundSize: 'cover', backgroundImage: `url(https://placehold.co/600x400?text=No+Image)` }} />
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                backgroundPosition: "center",
+                backgroundSize: "cover",
+                backgroundImage:
+                  "url(https://placehold.co/600x400?text=No+Image)",
+              }}
+            />
           )}
         </div>
       </div>
@@ -420,24 +486,28 @@ export default function UserPage() {
   const [search, setSearch] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
   const [filters, setFilters] = useState({
-    type: 'all',
-    gender: 'all',
-    rent: 'all',
+    type: "all",
+    gender: "all",
+    rent: "all",
   });
   const [expandedId, setExpandedId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const navigate = useNavigate();
   const { user } = useContext(StayContext);
+
   const [isSearchHovered, setIsSearchHovered] = useState(false);
   const [isRetryHovered, setIsRetryHovered] = useState(false);
   const [isMapLinkHovered, setIsMapLinkHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
+  // ✅ safe mobile detection (no window in initial state)
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const fetchStays = () => {
@@ -445,17 +515,12 @@ export default function UserPage() {
     setError(null);
 
     const params = new URLSearchParams();
-    if (activeSearch) {
-      params.append("title", activeSearch);
-    }
-    if (filters.type && filters.type !== 'all') {
-      params.append("type", filters.type);
-    }
-    if (filters.gender && filters.gender !== 'all') {
-      params.append("gender", filters.gender);
-    }
-    if (filters.rent && filters.rent !== 'all') {
-      const [minRent, maxRent] = filters.rent.split('-');
+    if (activeSearch) params.append("title", activeSearch);
+    if (filters.type && filters.type !== "all") params.append("type", filters.type);
+    if (filters.gender && filters.gender !== "all") params.append("gender", filters.gender);
+
+    if (filters.rent && filters.rent !== "all") {
+      const [minRent, maxRent] = filters.rent.split("-");
       params.append("minRent", minRent);
       if (maxRent) params.append("maxRent", maxRent);
     }
@@ -469,29 +534,31 @@ export default function UserPage() {
       })
       .catch((err) => {
         console.error(err);
-        setError("Failed to fetch stays. Please ensure the backend is running and check your connection.");
+        setError(
+          "Failed to fetch stays. Please ensure the backend is running and check your connection."
+        );
         setLoading(false);
       });
   };
 
   useEffect(() => {
     fetchStays();
-  }, [filters, activeSearch]); // Refetch when filters or the active search term change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, activeSearch]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setActiveSearch(search); // On search submit, update the active search term
+    setActiveSearch(search);
   };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters(prev => ({ ...prev, [name]: value }));
+    setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
   // ---------------- Contact Owner with login & subscription check ----------------
   const handleContactOwner = async (stayId) => {
     if (!user?.token) {
-      // Not logged in → redirect to login
       navigate("/login", { state: { redirectTo: `/` } });
       return;
     }
@@ -503,10 +570,11 @@ export default function UserPage() {
 
     try {
       const res = await API.get(`/stay/contact/${stayId}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
+        headers: { Authorization: `Bearer ${user.token}` },
       });
-      // ✅ Show number so user can see/copy it
-      alert(`Owner Contact Details:\n\nName: ${res.data.ownerName}\nPhone: ${res.data.phone}`);
+      alert(
+        `Owner Contact Details:\n\nName: ${res.data.ownerName}\nPhone: ${res.data.phone}`
+      );
     } catch (err) {
       alert(err.response?.data?.message || "Failed to contact owner");
     }
@@ -525,64 +593,71 @@ export default function UserPage() {
     }
 
     try {
-      // Create or get existing room
-      await API.post("/chat/start", { stayId }, { headers: { Authorization: `Bearer ${user.token}` } });
+      await API.post(
+        "/chat/start",
+        { stayId },
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
       navigate(`/chat/${stayId}`);
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to start chat. Is the backend server running?");
-    }
-  };
-
-  const handleSidebarItemHover = (e) => {
-    if (e.type === 'mouseenter') {
-      e.currentTarget.style.backgroundColor = colors.bg;
-      e.currentTarget.style.color = colors.primary;
-    } else {
-      e.currentTarget.style.backgroundColor = 'transparent';
-      e.currentTarget.style.color = colors.textPrimary;
+      alert(
+        err.response?.data?.message ||
+          "Failed to start chat. Is the backend server running?"
+      );
     }
   };
 
   const handleCardHover = (e) => {
     const card = e.currentTarget;
-    const imageSlider = card.querySelector('.image-slider');
-    if (e.type === 'mouseenter') {
-      card.style.transform = 'translateY(-8px)';
-      card.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-      if (imageSlider) imageSlider.style.transform = 'scale(1.05)';
+    const imageSlider = card.querySelector(".image-slider");
+    if (e.type === "mouseenter") {
+      card.style.transform = "translateY(-8px)";
+      card.style.boxShadow =
+        "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)";
+      if (imageSlider) imageSlider.style.transform = "scale(1.05)";
     } else {
-      card.style.transform = 'none';
+      card.style.transform = "none";
       card.style.boxShadow = styles.card.boxShadow;
-      if (imageSlider) imageSlider.style.transform = 'scale(1)';
+      if (imageSlider) imageSlider.style.transform = "scale(1)";
     }
   };
 
   return (
     <div style={styles.pageWrapper}>
       {/* Search & Actions Bar */}
-      <div style={styles.actionBar}>
-
-        <form onSubmit={handleSearch} style={{
-          ...styles.searchForm,
-          order: isMobile ? 2 : 0,
-          maxWidth: isMobile ? '100%' : '480px',
-          margin: isMobile ? '8px 0' : '0'
-        }}>
+      <div
+        style={{
+          ...styles.actionBar,
+          padding: isMobile ? "12px 16px" : "16px 24px",
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "stretch" : "center",
+          gap: isMobile ? "12px" : "16px",
+        }}
+      >
+        <form
+          onSubmit={handleSearch}
+          style={{
+            ...styles.searchForm,
+            order: isMobile ? 2 : 0,
+            maxWidth: isMobile ? "100%" : "480px",
+            margin: 0,
+          }}
+        >
           <input
             type="text"
             placeholder="Search by title..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={styles.searchInput}
-            onFocus={(e) => e.target.style.borderColor = colors.primary}
-            onBlur={(e) => e.target.style.borderColor = colors.border}
+            onFocus={(e) => (e.target.style.borderColor = colors.primary)}
+            onBlur={(e) => (e.target.style.borderColor = colors.border)}
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={{
               ...styles.searchButton,
-              ...(isSearchHovered && { backgroundColor: colors.professionalRedHover })
+              ...(isSearchHovered && { backgroundColor: colors.professionalRedHover }),
             }}
             onMouseEnter={() => setIsSearchHovered(true)}
             onMouseLeave={() => setIsSearchHovered(false)}
@@ -591,11 +666,19 @@ export default function UserPage() {
           </button>
         </form>
 
-        <div style={styles.navRight}>
+        <div
+          style={{
+            ...styles.navRight,
+            justifyContent: isMobile ? "space-between" : "flex-end",
+            width: isMobile ? "100%" : "auto",
+            flexWrap: "wrap",
+            gap: isMobile ? "12px" : "16px",
+          }}
+        >
           <span
             style={{
               ...styles.navItem,
-              ...(isMapLinkHovered && { color: colors.primary })
+              ...(isMapLinkHovered && { color: colors.primary }),
             }}
             onClick={() => navigate("/map")}
             onMouseEnter={() => setIsMapLinkHovered(true)}
@@ -603,20 +686,32 @@ export default function UserPage() {
           >
             🗺️ Map View
           </span>
+
           {user ? (
-            <>
-              <div style={styles.statusBox(user.isSubscribed)}>
-                {user.isSubscribed ? "Premium Plan" : "Free Plan"}
-              </div>
-            </>
+            <div style={styles.statusBox(user.isSubscribed)}>
+              {user.isSubscribed ? "Premium Plan" : "Free Plan"}
+            </div>
           ) : null}
         </div>
       </div>
 
-      <div style={styles.filterBar}>
+      {/* Filters */}
+      <div
+        style={{
+          ...styles.filterBar,
+          padding: isMobile ? "16px 16px" : "24px 24px",
+          flexDirection: isMobile ? "column" : "row",
+          alignItems: isMobile ? "stretch" : "flex-end",
+        }}
+      >
         <div style={styles.filterGroup}>
           <label style={styles.filterLabel}>Property Type</label>
-          <select name="type" value={filters.type} onChange={handleFilterChange} style={styles.filterSelect}>
+          <select
+            name="type"
+            value={filters.type}
+            onChange={handleFilterChange}
+            style={styles.filterSelect}
+          >
             <option value="all">All Types</option>
             <option value="Apartment">Apartment</option>
             <option value="PG">PG</option>
@@ -627,7 +722,12 @@ export default function UserPage() {
 
         <div style={styles.filterGroup}>
           <label style={styles.filterLabel}>For</label>
-          <select name="gender" value={filters.gender} onChange={handleFilterChange} style={styles.filterSelect}>
+          <select
+            name="gender"
+            value={filters.gender}
+            onChange={handleFilterChange}
+            style={styles.filterSelect}
+          >
             <option value="all">All Genders</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
@@ -636,7 +736,12 @@ export default function UserPage() {
 
         <div style={styles.filterGroup}>
           <label style={styles.filterLabel}>Rent Range (₹)</label>
-          <select name="rent" value={filters.rent} onChange={handleFilterChange} style={styles.filterSelect}>
+          <select
+            name="rent"
+            value={filters.rent}
+            onChange={handleFilterChange}
+            style={styles.filterSelect}
+          >
             <option value="all">All Prices</option>
             <option value="0-5000">Under 5,000</option>
             <option value="5000-10000">5,000 - 10,000</option>
@@ -646,18 +751,27 @@ export default function UserPage() {
         </div>
       </div>
 
-      <div style={styles.mainContent}>
-        {/* Main Content */}
+      <div
+        style={{
+          ...styles.mainContent,
+          padding: isMobile ? "0 16px 24px" : "0 24px 40px",
+        }}
+      >
         <div style={styles.centerContent}>
-          {loading && <p style={{ textAlign: "center", padding: "40px", fontSize: "1.2rem" }}>Loading stays...</p>}
+          {loading && (
+            <p style={{ textAlign: "center", padding: "40px", fontSize: "1.2rem" }}>
+              Loading stays...
+            </p>
+          )}
+
           {error && (
             <div style={styles.errorContainer}>
               <p style={styles.errorText}>{error}</p>
-              <button 
-                onClick={fetchStays} 
+              <button
+                onClick={fetchStays}
                 style={{
                   ...styles.retryButton,
-                  ...(isRetryHovered && { background: colors.professionalRedHover })
+                  ...(isRetryHovered && { background: colors.professionalRedHover }),
                 }}
                 onMouseEnter={() => setIsRetryHovered(true)}
                 onMouseLeave={() => setIsRetryHovered(false)}
@@ -668,13 +782,15 @@ export default function UserPage() {
           )}
 
           {!loading && !error && (stays.length === 0 ? (
-            <p style={styles.noData}>No stays match your criteria. Try adjusting the filters.</p>
+            <p style={styles.noData}>
+              No stays match your criteria. Try adjusting the filters.
+            </p>
           ) : (
             <>
-              <div style={styles.grid}>
+              <div style={{ ...styles.grid, gap: isMobile ? "16px" : "24px" }}>
                 {stays.map((stay) => (
-                  <div 
-                    key={stay._id} 
+                  <div
+                    key={stay._id}
                     style={styles.card}
                     onMouseEnter={handleCardHover}
                     onMouseLeave={handleCardHover}
@@ -683,18 +799,42 @@ export default function UserPage() {
                       <div style={styles.priceTag}>₹{stay.rent.toLocaleString()}</div>
                       <ImageSlider images={stay.images} title={stay.title} />
                     </div>
+
                     <div style={styles.cardBody}>
                       <div style={styles.badges}>
-                        <span style={{ ...styles.badge, background: colors.bg, color: colors.textSecondary }}>
+                        <span
+                          style={{
+                            ...styles.badge,
+                            background: colors.bg,
+                            color: colors.textSecondary,
+                          }}
+                        >
                           {stay.type}
                         </span>
-                        <span style={{ ...styles.badge, background: stay.gender === 'female' ? '#fce7f3' : stay.gender === 'male' ? '#e0f2fe' : '#f3f4f6', color: stay.gender === 'female' ? '#be185d' : stay.gender === 'male' ? '#0369a1' : '#374151' }}>
+
+                        <span
+                          style={{
+                            ...styles.badge,
+                            background:
+                              stay.gender === "female"
+                                ? "#fce7f3"
+                                : stay.gender === "male"
+                                ? "#e0f2fe"
+                                : "#f3f4f6",
+                            color:
+                              stay.gender === "female"
+                                ? "#be185d"
+                                : stay.gender === "male"
+                                ? "#0369a1"
+                                : "#374151",
+                          }}
+                        >
                           {stay.gender.charAt(0).toUpperCase() + stay.gender.slice(1)}
                         </span>
                       </div>
-                      
+
                       <h3 style={styles.title}>{stay.title}</h3>
-                      
+
                       <div style={styles.infoRow}>
                         <span>📍</span> {stay.address}
                       </div>
@@ -706,23 +846,53 @@ export default function UserPage() {
                               <span>👤</span> Owner: {stay.ownerId.name}
                             </div>
                           )}
+
                           {stay.images && stay.images.length > 0 && (
-                            <div style={{ marginTop: '16px' }}>
-                              <p style={{ fontSize: '0.85rem', fontWeight: '600', color: colors.textSecondary, marginBottom: '8px' }}>Photos</p>
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                            <div style={{ marginTop: "16px" }}>
+                              <p
+                                style={{
+                                  fontSize: "0.85rem",
+                                  fontWeight: "600",
+                                  color: colors.textSecondary,
+                                  marginBottom: "8px",
+                                }}
+                              >
+                                Photos
+                              </p>
+
+                              <div
+                                style={{
+                                  display: "grid",
+                                  gridTemplateColumns: isMobile
+                                    ? "repeat(2, 1fr)"
+                                    : "repeat(4, 1fr)",
+                                  gap: "8px",
+                                }}
+                              >
                                 {stay.images.slice(0, 4).map((img, idx) => (
-                                  <div 
+                                  <div
                                     key={idx}
-                                    style={{ 
-                                      aspectRatio: '1', 
-                                      borderRadius: '8px', 
-                                      overflow: 'hidden', 
+                                    style={{
+                                      aspectRatio: "1",
+                                      borderRadius: "8px",
+                                      overflow: "hidden",
                                       border: `1px solid ${colors.border}`,
-                                      cursor: 'pointer'
+                                      cursor: "pointer",
                                     }}
-                                    onClick={(e) => { e.stopPropagation(); window.open(getImageUrl(img), '_blank'); }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(getImageUrl(img), "_blank");
+                                    }}
                                   >
-                                    <img src={getImageUrl(img)} alt="Stay preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <img
+                                      src={getImageUrl(img)}
+                                      alt="Stay preview"
+                                      style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                      }}
+                                    />
                                   </div>
                                 ))}
                               </div>
@@ -731,19 +901,27 @@ export default function UserPage() {
                         </>
                       )}
 
-                      <div style={styles.cardButtons}>
+                      <div style={styles.cardButtons(isMobile)}>
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleContactOwner(stay._id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleContactOwner(stay._id);
+                          }}
                           style={{ ...styles.buttonBase, ...styles.secondaryButton }}
                         >
                           📞 Contact
                         </button>
+
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleStartChat(stay._id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartChat(stay._id);
+                          }}
                           style={{ ...styles.buttonBase, ...styles.primaryButton }}
                         >
                           💬 Chat
                         </button>
+
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -762,10 +940,17 @@ export default function UserPage() {
               {/* Map */}
               {stays.length > 0 && (
                 <div style={styles.mapContainer}>
-                  <MapContainer center={[20, 78]} zoom={5} style={{ height: "100%", width: "100%" }}>
+                  <MapContainer
+                    center={[20, 78]}
+                    zoom={5}
+                    style={{ height: "100%", width: "100%" }}
+                  >
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     {stays.map((stay) => (
-                      <Marker key={stay._id} position={[stay.lat || 20, stay.lng || 78]}>
+                      <Marker
+                        key={stay._id}
+                        position={[stay.lat || 20, stay.lng || 78]}
+                      >
                         <Popup>
                           <strong>{stay.title}</strong>
                           <p>{stay.address}</p>
@@ -781,7 +966,6 @@ export default function UserPage() {
         </div>
       </div>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

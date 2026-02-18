@@ -1,5 +1,6 @@
 import { useState, useContext } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import API from "../api";
 import { StayContext } from "../context/StayContext.jsx";
 
@@ -13,7 +14,6 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isLoginHovered, setIsLoginHovered] = useState(false);
 
   const handleLogin = async () => {
     try {
@@ -60,42 +60,60 @@ export default function LoginPage() {
 
   return (
     <div style={styles.page}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Welcome Back</h2>
-        <p style={styles.subtitle}>Login to your StayEase account</p>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        style={styles.card}
+      >
+        <div style={{ marginBottom: "32px", textAlign: "center" }}>
+          <h2 style={styles.title}>Welcome Back</h2>
+          <p style={styles.subtitle}>Login to your StayEase account</p>
+        </div>
 
-        <input
-          style={styles.input}
-          placeholder="Username"
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-        />
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Username</label>
+          <motion.input
+            whileFocus={{ borderColor: "#6366f1", boxShadow: "0 0 0 3px rgba(99, 102, 241, 0.1)" }}
+            style={styles.input}
+            placeholder="Enter your username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+          />
+        </div>
 
-        <input
-          style={styles.input}
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Password</label>
+          <motion.input
+            whileFocus={{ borderColor: "#6366f1", boxShadow: "0 0 0 3px rgba(99, 102, 241, 0.1)" }}
+            style={styles.input}
+            type="password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+          />
+        </div>
 
-        <button
-          style={{
-            ...styles.button,
-            ...(isLoginHovered && styles.buttonHover)
-          }}
+        <motion.button
+          whileHover={{ scale: 1.02, backgroundColor: "#9b2c2c" }}
+          whileTap={{ scale: 0.98 }}
+          style={styles.button}
           onClick={handleLogin}
           disabled={loading}
-          onMouseEnter={() => setIsLoginHovered(true)}
-          onMouseLeave={() => setIsLoginHovered(false)}
         >
           {loading ? "Logging in..." : "Login"}
-        </button>
+        </motion.button>
 
-        <Link to="/forgot-password" style={styles.link}>
-          Forgot password?
-        </Link>
-      </div>
+        <div style={styles.linkContainer}>
+          <Link to="/forgot-password" style={styles.link}>
+            Forgot password?
+          </Link>
+        </div>
+
+        <div style={{ marginTop: "24px", textAlign: "center", fontSize: "14px", color: "#64748b" }}>
+          Don't have an account? <Link to="/signup" style={{ ...styles.link, color: "#c53030" }}>Sign up</Link>
+        </div>
+      </motion.div>
     </div>
   );
 }
@@ -105,59 +123,75 @@ export default function LoginPage() {
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #667eea, #764ba2)",
+    background: "#f8fafc", // Slate-50
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+    padding: "20px",
   },
   card: {
-    width: "380px",
-    background: "#fff",
-    borderRadius: "14px",
-    padding: "32px",
-    boxShadow: "0 15px 35px rgba(0,0,0,0.15)",
-    textAlign: "center",
+    width: "100%",
+    maxWidth: "440px",
+    background: "#ffffff",
+    borderRadius: "20px",
+    padding: "48px 40px",
+    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)", // Elegant shadow
   },
   title: {
-    marginBottom: "6px",
-    fontSize: "26px",
-    fontWeight: "700",
+    margin: "0 0 8px 0",
+    fontSize: "30px",
+    fontWeight: "800",
+    color: "#1e293b", // Slate-800
+    letterSpacing: "-0.025em",
   },
   subtitle: {
-    marginBottom: "22px",
+    margin: 0,
+    fontSize: "16px",
+    color: "#64748b", // Slate-500
+  },
+  inputGroup: {
+    marginBottom: "24px",
+  },
+  label: {
+    display: "block",
+    marginBottom: "8px",
     fontSize: "14px",
-    color: "#666",
+    fontWeight: "600",
+    color: "#334155", // Slate-700
   },
   input: {
     width: "100%",
-    padding: "12px",
-    marginBottom: "14px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
+    padding: "14px 16px",
+    borderRadius: "12px",
+    border: "1px solid #e2e8f0", // Slate-200
     fontSize: "15px",
     outline: "none",
+    backgroundColor: "#f8fafc",
+    color: "#0f172a",
   },
   button: {
     width: "100%",
-    padding: "12px",
-    borderRadius: "8px",
+    padding: "16px",
+    borderRadius: "12px",
     border: "none",
     background: "#c53030",
     color: "#fff",
-    fontWeight: "600",
+    fontWeight: "700",
     fontSize: "16px",
     cursor: "pointer",
-    marginTop: "5px",
-    transition: "background-color 0.2s ease-in-out",
+    marginTop: "8px",
+    boxShadow: "0 4px 6px -1px rgba(197, 48, 48, 0.2)",
   },
-  buttonHover: {
-    background: "#9b2c2c",
+  linkContainer: {
+    marginTop: "24px",
+    textAlign: "center",
   },
   link: {
-    display: "block",
-    marginTop: "16px",
     fontSize: "14px",
-    color: "#667eea",
+    color: "#6366f1",
     textDecoration: "none",
+    fontWeight: "600",
+    transition: "color 0.2s",
   },
 };

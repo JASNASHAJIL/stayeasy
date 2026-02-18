@@ -108,6 +108,23 @@ const styles = {
   },
 };
 
+const API_BASE_URL = (import.meta.env && import.meta.env.VITE_API_URL) || (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) || "http://localhost:5000";
+const SERVER_URL = API_BASE_URL.replace(/\/api\/?$/, "");
+
+const getImageUrl = (img) => {
+  if (!img) return "https://placehold.co/600x400?text=No+Image";
+  let imgPath = img.toString().replace(/\\/g, "/");
+  if (imgPath.startsWith("http") || imgPath.startsWith("data:")) return imgPath;
+  if (imgPath.startsWith("photo-")) return `https://images.unsplash.com/${imgPath}?w=600&h=400&fit=crop`;
+
+  // Ensure path includes 'uploads/' for local files
+  if (!imgPath.includes("uploads/")) {
+    imgPath = `uploads/${imgPath.startsWith("/") ? imgPath.slice(1) : imgPath}`;
+  }
+
+  return `${SERVER_URL}${imgPath.startsWith("/") ? "" : "/"}${imgPath}`;
+};
+
 const UserMapPage = () => {
   const [stays, setStays] = useState([]);
   const navigate = useNavigate();
@@ -129,15 +146,6 @@ const UserMapPage = () => {
         console.error("Failed to fetch stays for map", err);
       });
   }, []);
-
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
-  const getImageUrl = (img) => {
-    if (!img) return "https://placehold.co/600x400?text=No+Image";
-    if (img.startsWith("http") || img.startsWith("data:")) return img;
-    if (img.startsWith("photo-")) return `https://images.unsplash.com/${img}?w=600&h=400&fit=crop`;
-    return `${API_BASE_URL}${img.startsWith("/") ? "" : "/"}${img}`;
-  };
 
   return (
     <div style={styles.pageWrapper}>
@@ -178,7 +186,7 @@ const UserMapPage = () => {
                 <Popup>
                   <div style={styles.popupCard}>
                     <img 
-                      src={getImageUrl(stay.images[0])} 
+                      src={getImageUrl(stay.images?.[0])} 
                       alt={stay.title} 
                       style={styles.popupImage} 
                     />

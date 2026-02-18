@@ -1,5 +1,6 @@
 import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import API from "../api";
 import { StayContext } from "../context/StayContext";
 
@@ -12,7 +13,6 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user");
   const [loading, setLoading] = useState(false);
-  const [isSignupHovered, setIsSignupHovered] = useState(false);
 
   const handleSignup = async () => {
     try {
@@ -30,55 +30,84 @@ export default function SignupPage() {
 
   return (
     <div style={styles.page}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Create Your Account</h2>
-        <p style={styles.subtitle}>Sign up to start using StayEase</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        style={styles.card}
+      >
+        <div style={{ marginBottom: "32px", textAlign: "center" }}>
+          <h2 style={styles.title}>Create Your Account</h2>
+          <p style={styles.subtitle}>Sign up to start using StayEase</p>
+        </div>
 
-        <input
-          style={styles.input}
-          placeholder="Username"
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-        />
-        <input
-          style={styles.input}
-          placeholder="Full Name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-        />
-        <input
-          style={styles.input}
-          placeholder="Phone"
-          value={phone}
-          onChange={e => setPhone(e.target.value)}
-        />
-        <input
-          style={styles.input}
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Username</label>
+          <motion.input
+            whileFocus={{ borderColor: "#6366f1", boxShadow: "0 0 0 3px rgba(99, 102, 241, 0.1)" }}
+            style={styles.input}
+            placeholder="Choose a unique username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+          />
+        </div>
 
-        <select style={styles.select} value={role} onChange={e => setRole(e.target.value)}>
-          <option value="user">User</option>
-          <option value="owner">Owner</option>
-        </select>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Full Name</label>
+          <motion.input
+            whileFocus={{ borderColor: "#6366f1", boxShadow: "0 0 0 3px rgba(99, 102, 241, 0.1)" }}
+            style={styles.input}
+            placeholder="Enter your full name"
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
+        </div>
 
-        <button
-          style={{ ...styles.button, ...(isSignupHovered && styles.buttonHover) }}
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Phone</label>
+          <motion.input
+            whileFocus={{ borderColor: "#6366f1", boxShadow: "0 0 0 3px rgba(99, 102, 241, 0.1)" }}
+            style={styles.input}
+            placeholder="Enter your phone number"
+            value={phone}
+            onChange={e => setPhone(e.target.value)}
+          />
+        </div>
+
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Password</label>
+          <motion.input
+            whileFocus={{ borderColor: "#6366f1", boxShadow: "0 0 0 3px rgba(99, 102, 241, 0.1)" }}
+            style={styles.input}
+            type="password"
+            placeholder="Create a strong password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+          />
+        </div>
+
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>I am a...</label>
+          <select style={styles.select} value={role} onChange={e => setRole(e.target.value)}>
+            <option value="user">User (Looking for a stay)</option>
+            <option value="owner">Owner (Listing a property)</option>
+          </select>
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.02, backgroundColor: "#9b2c2c" }}
+          whileTap={{ scale: 0.98 }}
+          style={styles.button}
           onClick={handleSignup}
           disabled={loading}
-          onMouseEnter={() => setIsSignupHovered(true)}
-          onMouseLeave={() => setIsSignupHovered(false)}
         >
           {loading ? "Registering..." : "Register"}
-        </button>
+        </motion.button>
 
-        <p style={styles.footerText}>
-          Already have an account? <a href="/login" style={styles.link}>Login here</a>
-        </p>
-      </div>
+        <div style={{ marginTop: "24px", textAlign: "center", fontSize: "14px", color: "#64748b" }}>
+          Already have an account? <Link to="/login" style={{ ...styles.link, color: "#c53030" }}>Login here</Link>
+        </div>
+      </motion.div>
     </div>
   );
 }
@@ -87,80 +116,82 @@ export default function SignupPage() {
 const styles = {
   page: {
     minHeight: "100vh",
-    width: "100vw",                 // Ensure full width
+    background: "#f8fafc", // Slate-50
     display: "flex",
-    justifyContent: "center",
     alignItems: "center",
-    background: "linear-gradient(135deg, #667eea, #764ba2)",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    padding: "0",                   // Remove extra padding
-    margin: "0",                     // Remove default margin
-    boxSizing: "border-box",        // Prevent overflow issues
+    justifyContent: "center",
+    fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+    padding: "20px",
   },
   card: {
     width: "100%",
-    maxWidth: "400px",              // Fixed max width
+    maxWidth: "440px",
     background: "#ffffff",
-    borderRadius: "14px",
-    padding: "40px 32px",
-    boxShadow: "0 15px 35px rgba(0,0,0,0.15)",
-    textAlign: "center",
+    borderRadius: "20px",
+    padding: "48px 40px",
+    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)", // Elegant shadow
   },
   title: {
+    margin: "0 0 8px 0",
     fontSize: "30px",
-    fontWeight: "700",
-    marginBottom: "8px",
-    color: "#1a1a1a",
+    fontWeight: "800",
+    color: "#1e293b", // Slate-800
+    letterSpacing: "-0.025em",
   },
   subtitle: {
+    margin: 0,
+    fontSize: "16px",
+    color: "#64748b", // Slate-500
+  },
+  inputGroup: {
+    marginBottom: "24px",
+  },
+  label: {
+    display: "block",
+    marginBottom: "8px",
     fontSize: "14px",
-    color: "#555",
-    marginBottom: "28px",
+    fontWeight: "600",
+    color: "#334155", // Slate-700
   },
   input: {
     width: "100%",
-    padding: "12px 15px",
-    marginBottom: "16px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
+    padding: "14px 16px",
+    borderRadius: "12px",
+    border: "1px solid #e2e8f0", // Slate-200
     fontSize: "15px",
     outline: "none",
-    transition: "0.3s all",
+    backgroundColor: "#f8fafc",
+    color: "#0f172a",
   },
   select: {
     width: "100%",
-    padding: "12px 15px",
-    marginBottom: "24px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
+    padding: "14px 16px",
+    borderRadius: "12px",
+    border: "1px solid #e2e8f0",
     fontSize: "15px",
     outline: "none",
-    transition: "0.3s all",
+    backgroundColor: "#f8fafc",
+    color: "#0f172a",
+    cursor: "pointer",
   },
   button: {
     width: "100%",
-    padding: "12px",
-    borderRadius: "8px",
+    padding: "16px",
+    borderRadius: "12px",
     border: "none",
     background: "#c53030",
     color: "#fff",
-    fontWeight: "600",
+    fontWeight: "700",
     fontSize: "16px",
     cursor: "pointer",
-    transition: "0.3s all",
-  },
-  buttonHover: {
-    background: "#9b2c2c",
-  },
-  footerText: {
-    marginTop: "18px",
-    fontSize: "14px",
-    color: "#555",
+    marginTop: "8px",
+    boxShadow: "0 4px 6px -1px rgba(197, 48, 48, 0.2)",
   },
   link: {
-    color: "#667eea",
+    fontSize: "14px",
+    color: "#6366f1",
     textDecoration: "none",
     fontWeight: "600",
-    transition: "0.3s",
+    transition: "color 0.2s",
   },
 };
